@@ -1,7 +1,7 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getSubjectsForClassName } from "@/lib/curriculum";
 
 export interface StudentInClass {
   id: string;
@@ -50,8 +50,14 @@ export default function MarksEntryForm({
 
   // Selection state
   const [selectedClassId, setSelectedClassId] = useState(classes[0]?.id || "");
+  const initialClass = classes[0];
+  const initialSubjects = initialClass ? getSubjectsForClassName(initialClass.name) : [];
+
   const [examTitle, setExamTitle] = useState("Semester Assessment 1");
-  const [subjectName, setSubjectName] = useState(defaultSubject);
+  const [subjectName, setSubjectName] = useState(
+    initialSubjects[0] || defaultSubject || "Core Subject"
+  );
+  const [isCustomSubject, setIsCustomSubject] = useState(false);
   const [maxMarks, setMaxMarks] = useState(100);
   const [examDate, setExamDate] = useState(new Date().toISOString().slice(0, 10));
 
@@ -68,6 +74,7 @@ export default function MarksEntryForm({
 
   const currentClass = classes.find((c) => c.id === selectedClassId) || classes[0];
   const studentsInCurrentClass = currentClass?.students || [];
+  const classSubjects = currentClass ? getSubjectsForClassName(currentClass.name) : [];
 
   function handleMarkChange(studentId: string, value: string) {
     setMarksMap((prev) => ({
@@ -284,8 +291,17 @@ export default function MarksEntryForm({
                 <select
                   value={selectedClassId}
                   onChange={(e) => {
-                    setSelectedClassId(e.target.value);
+                    const newId = e.target.value;
+                    setSelectedClassId(newId);
                     setMarksMap({});
+                    const targetClass = classes.find((c) => c.id === newId);
+                    if (targetClass) {
+                      const subjects = getSubjectsForClassName(targetClass.name);
+                      if (subjects.length > 0) {
+                        setSubjectName(subjects[0]);
+                        setIsCustomSubject(false);
+                      }
+                    }
                   }}
                   required
                 >
@@ -311,29 +327,53 @@ export default function MarksEntryForm({
               </div>
 
               <div className="field">
-                <label>Subject Name *</label>
-                <input
-                  type="text"
-                  placeholder="Enter subject name (e.g. Data Structures, Maths, etc.)"
-                  value={subjectName}
-                  onChange={(e) => setSubjectName(e.target.value)}
-                  required
-                />
-                <div style={{ marginTop: "0.4rem", display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
-                  {["Computer Science", "Mathematics", "Operating Systems", "Database Systems", "Software Engineering"].map(
-                    (preset) => (
-                      <button
-                        key={preset}
-                        type="button"
-                        className="secondary"
-                        style={{ fontSize: "0.72rem", padding: "0.2rem 0.5rem", borderRadius: "8px" }}
-                        onClick={() => setSubjectName(preset)}
-                      >
-                        {preset}
-                      </button>
-                    )
-                  )}
-                </div>
+                <label>
+                  Subject Name * {classSubjects.length > 0 ? `(${classSubjects.length} subjects in curriculum)` : ""}
+                </label>
+                {classSubjects.length > 0 ? (
+                  <>
+                    <select
+                      value={isCustomSubject ? "__custom__" : subjectName}
+                      onChange={(e) => {
+                        if (e.target.value === "__custom__") {
+                          setIsCustomSubject(true);
+                          setSubjectName("");
+                        } else {
+                          setIsCustomSubject(false);
+                          setSubjectName(e.target.value);
+                        }
+                      }}
+                      required
+                    >
+                      <option value="" disabled>-- Select Official Subject from Curriculum --</option>
+                      {classSubjects.map((s) => (
+                        <option key={s} value={s}>
+                          📖 {s}
+                        </option>
+                      ))}
+                      <option value="__custom__">✏️ Custom / Elective Subject (Type below)</option>
+                    </select>
+
+                    {(isCustomSubject || !classSubjects.includes(subjectName)) && (
+                      <input
+                        type="text"
+                        placeholder="Type custom subject name..."
+                        value={subjectName}
+                        onChange={(e) => setSubjectName(e.target.value)}
+                        style={{ marginTop: "0.5rem" }}
+                        required
+                      />
+                    )}
+                  </>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="Enter subject name"
+                    value={subjectName}
+                    onChange={(e) => setSubjectName(e.target.value)}
+                    required
+                  />
+                )}
               </div>
 
               <div className="field">

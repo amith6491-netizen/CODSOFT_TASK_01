@@ -1,27 +1,41 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 const features = [
   { title: "Attendance", text: "Track class presence in seconds with live status updates." },
-  { title: "Exams", text: "Create assessments and keep performance history organized." },
+  { title: "Exams & Marks", text: "Create assessments and keep year-wise performance history organized." },
   { title: "Fees", text: "Monitor payments, due dates, and pending dues at a glance." },
 ];
 
-const stats = [
-  { value: "3.4k", label: "Students" },
-  { value: "98%", label: "Attendance rate" },
-  { value: "24/7", label: "Access" },
-];
+export default async function HomePage() {
+  const [studentCount, teacherCount, classCount, pendingFeesCount, totalAttendance, presentAttendance] =
+    await Promise.all([
+      prisma.student.count(),
+      prisma.teacher.count(),
+      prisma.classSection.count(),
+      prisma.fee.count({ where: { status: { in: ["PENDING", "OVERDUE"] } } }),
+      prisma.attendance.count(),
+      prisma.attendance.count({ where: { status: "PRESENT" } }),
+    ]);
 
-export default function HomePage() {
+  const attendanceRate =
+    totalAttendance > 0 ? Math.round((presentAttendance / totalAttendance) * 100) : 100;
+
+  const stats = [
+    { value: `${studentCount}`, label: "Enrolled Students" },
+    { value: `${classCount}`, label: "Degree Courses (UG & PG)" },
+    { value: `${teacherCount}`, label: "Faculty Members" },
+  ];
+
   return (
     <main className="landing-shell">
       <section className="hero-panel">
         <div className="hero-copy">
-          <span className="eyebrow">School operations, simplified</span>
-          <h1>One platform for smarter learning and stronger school management.</h1>
+          <span className="eyebrow">Higher Education Management</span>
+          <h1>One platform for smarter learning and stronger campus administration.</h1>
           <p>
-            EduManage connects every student, teacher, and administrator in one streamlined workspace
-            for attendance, grading, fee tracking, and academic visibility.
+            EduManage connects every student, faculty member, and administrator in one streamlined workspace
+            for degree courses, continuous assessments, attendance, and fee tracking.
           </p>
           <div className="cta-row">
             <Link href="/login" className="primary-btn">Sign in</Link>
@@ -39,21 +53,21 @@ export default function HomePage() {
 
         <div className="hero-visual">
           <div className="visual-card main-card">
-            <span className="status-pill success">Live insights</span>
-            <h3>School overview</h3>
+            <span className="status-pill success">Live Database</span>
+            <h3>Campus Overview</h3>
             <div className="bar-group">
-              <span style={{ width: "82%" }} />
-              <span style={{ width: "74%" }} />
-              <span style={{ width: "91%" }} />
+              <span style={{ width: `${Math.min(100, Math.max(15, studentCount * 20))}%` }} />
+              <span style={{ width: `${Math.min(100, Math.max(20, classCount * 4))}%` }} />
+              <span style={{ width: `${attendanceRate}%` }} />
             </div>
           </div>
           <div className="visual-card small-card">
             <p>Fees pending</p>
-            <strong>28</strong>
+            <strong>{pendingFeesCount}</strong>
           </div>
           <div className="visual-card small-card alt-card">
             <p>Attendance</p>
-            <strong>96.4%</strong>
+            <strong>{attendanceRate}%</strong>
           </div>
         </div>
       </section>

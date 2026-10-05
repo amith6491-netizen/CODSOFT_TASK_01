@@ -36,10 +36,18 @@ export default async function TeacherDashboard() {
     }),
   ]);
 
-  const activeClasses = teacher?.classes && teacher.classes.length > 0 ? teacher.classes : allClasses;
+  const sortedClasses = [...allClasses].sort((a, b) => {
+    const aIsUG = a.name.startsWith("UG");
+    const bIsUG = b.name.startsWith("UG");
+    if (aIsUG && !bIsUG) return -1;
+    if (!aIsUG && bIsUG) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  const activeClasses = teacher?.classes && teacher.classes.length > 0 ? teacher.classes : sortedClasses;
   const allStudents = activeClasses.flatMap((c) => c.students);
 
-  const classesForMarks = allClasses.map((c) => ({
+  const classesForMarks = sortedClasses.map((c) => ({
     id: c.id,
     name: c.name,
     gradeYear: c.gradeYear,

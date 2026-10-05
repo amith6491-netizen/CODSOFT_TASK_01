@@ -43,21 +43,36 @@ async function main() {
   });
 
   const additionalCourses = [
+    // UG - B.Tech CSE
     { name: "UG - B.Tech CSE (Year 2)", gradeYear: 2 },
     { name: "UG - B.Tech CSE (Year 3)", gradeYear: 3 },
     { name: "UG - B.Tech CSE (Year 4)", gradeYear: 4 },
+    // UG - B.Tech ECE
+    { name: "UG - B.Tech ECE (Year 1)", gradeYear: 1 },
+    { name: "UG - B.Tech ECE (Year 2)", gradeYear: 2 },
+    { name: "UG - B.Tech ECE (Year 3)", gradeYear: 3 },
+    { name: "UG - B.Tech ECE (Year 4)", gradeYear: 4 },
+    // UG - BCA
     { name: "UG - BCA (Year 1)", gradeYear: 1 },
     { name: "UG - BCA (Year 2)", gradeYear: 2 },
     { name: "UG - BCA (Year 3)", gradeYear: 3 },
-    { name: "UG - B.Sc Data Science (Year 1)", gradeYear: 1 },
-    { name: "UG - B.Com (Hons) (Year 1)", gradeYear: 1 },
+    // UG - B.Sc Computer Science
+    { name: "UG - B.Sc Computer Science (Year 1)", gradeYear: 1 },
+    // UG - B.Com
+    { name: "UG - B.Com (Year 1)", gradeYear: 1 },
+    // UG - BBA
     { name: "UG - BBA (Year 1)", gradeYear: 1 },
+    // PG - MCA
     { name: "PG - MCA (Year 1)", gradeYear: 1 },
     { name: "PG - MCA (Year 2)", gradeYear: 2 },
+    // PG - MBA
     { name: "PG - MBA (Year 1)", gradeYear: 1 },
     { name: "PG - MBA (Year 2)", gradeYear: 2 },
+    // PG - M.Tech CSE
     { name: "PG - M.Tech CSE (Year 1)", gradeYear: 1 },
-    { name: "PG - M.Sc Computer Science (Year 1)", gradeYear: 1 },
+    { name: "PG - M.Tech CSE (Year 2)", gradeYear: 2 },
+    // PG - M.Sc Data Science
+    { name: "PG - M.Sc Data Science (Year 1)", gradeYear: 1 },
   ];
 
   for (const course of additionalCourses) {

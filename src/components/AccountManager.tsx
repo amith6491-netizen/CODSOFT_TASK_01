@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getSubjectsForClassName } from "@/lib/curriculum";
 
 export interface ClassOption {
   id: string;
@@ -54,6 +55,7 @@ export default function AccountManager({
 
   // Search filter
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCourseSubjectsId, setExpandedCourseSubjectsId] = useState<string | null>(null);
 
   // Single Student State
   const [studentForm, setStudentForm] = useState({
@@ -1295,37 +1297,82 @@ export default function AccountManager({
                     <th>Course Name</th>
                     <th>Year</th>
                     <th>Enrolled</th>
+                    <th>Curriculum</th>
                   </tr>
                 </thead>
                 <tbody>
                   {ugClasses.map((c) => {
                     const studentCount = students.filter((s) => s.class?.name === c.name).length;
+                    const subjects = getSubjectsForClassName(c.name);
+                    const isExpanded = expandedCourseSubjectsId === c.id;
+
                     return (
-                      <tr key={c.id}>
-                        <td>
-                          <strong>{c.name}</strong>
-                        </td>
-                        <td>Year {c.gradeYear}</td>
-                        <td>
-                          <span
-                            style={{
-                              background: studentCount > 0 ? "rgba(41, 165, 109, 0.12)" : "rgba(86, 101, 146, 0.1)",
-                              color: studentCount > 0 ? "var(--green)" : "var(--muted)",
-                              padding: "0.2rem 0.5rem",
-                              borderRadius: "999px",
-                              fontSize: "0.8rem",
-                              fontWeight: 600,
-                            }}
-                          >
-                            {studentCount} student{studentCount === 1 ? "" : "s"}
-                          </span>
-                        </td>
-                      </tr>
+                      <React.Fragment key={c.id}>
+                        <tr>
+                          <td>
+                            <strong>{c.name}</strong>
+                          </td>
+                          <td>Year {c.gradeYear}</td>
+                          <td>
+                            <span
+                              style={{
+                                background: studentCount > 0 ? "rgba(41, 165, 109, 0.12)" : "rgba(86, 101, 146, 0.1)",
+                                color: studentCount > 0 ? "var(--green)" : "var(--muted)",
+                                padding: "0.2rem 0.5rem",
+                                borderRadius: "999px",
+                                fontSize: "0.8rem",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {studentCount} student{studentCount === 1 ? "" : "s"}
+                            </span>
+                          </td>
+                          <td>
+                            {subjects.length > 0 ? (
+                              <button
+                                type="button"
+                                className="secondary"
+                                style={{ fontSize: "0.74rem", padding: "0.2rem 0.5rem", borderRadius: "8px" }}
+                                onClick={() => setExpandedCourseSubjectsId(isExpanded ? null : c.id)}
+                              >
+                                {isExpanded ? "Hide" : `📚 ${subjects.length} Subjects`}
+                              </button>
+                            ) : (
+                              <span style={{ color: "var(--muted)", fontSize: "0.75rem" }}>—</span>
+                            )}
+                          </td>
+                        </tr>
+                        {isExpanded && subjects.length > 0 && (
+                          <tr>
+                            <td colSpan={4} style={{ background: "rgba(47, 74, 199, 0.03)", padding: "0.8rem 1rem" }}>
+                              <small style={{ fontWeight: 700, color: "var(--indigo)", display: "block", marginBottom: "0.3rem" }}>
+                                Official Subjects for {c.name}:
+                              </small>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                                {subjects.map((s) => (
+                                  <span
+                                    key={s}
+                                    style={{
+                                      background: "#fff",
+                                      border: "1px solid var(--rule)",
+                                      padding: "0.2rem 0.5rem",
+                                      borderRadius: "6px",
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    📖 {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })}
                   {ugClasses.length === 0 && (
                     <tr>
-                      <td colSpan={3} style={{ textAlign: "center", color: "var(--muted)" }}>
+                      <td colSpan={4} style={{ textAlign: "center", color: "var(--muted)" }}>
                         No UG degree courses created yet.
                       </td>
                     </tr>
@@ -1347,37 +1394,82 @@ export default function AccountManager({
                     <th>Course Name</th>
                     <th>Year</th>
                     <th>Enrolled</th>
+                    <th>Curriculum</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pgClasses.map((c) => {
                     const studentCount = students.filter((s) => s.class?.name === c.name).length;
+                    const subjects = getSubjectsForClassName(c.name);
+                    const isExpanded = expandedCourseSubjectsId === c.id;
+
                     return (
-                      <tr key={c.id}>
-                        <td>
-                          <strong>{c.name}</strong>
-                        </td>
-                        <td>Year {c.gradeYear}</td>
-                        <td>
-                          <span
-                            style={{
-                              background: studentCount > 0 ? "rgba(41, 165, 109, 0.12)" : "rgba(86, 101, 146, 0.1)",
-                              color: studentCount > 0 ? "var(--green)" : "var(--muted)",
-                              padding: "0.2rem 0.5rem",
-                              borderRadius: "999px",
-                              fontSize: "0.8rem",
-                              fontWeight: 600,
-                            }}
-                          >
-                            {studentCount} student{studentCount === 1 ? "" : "s"}
-                          </span>
-                        </td>
-                      </tr>
+                      <React.Fragment key={c.id}>
+                        <tr>
+                          <td>
+                            <strong>{c.name}</strong>
+                          </td>
+                          <td>Year {c.gradeYear}</td>
+                          <td>
+                            <span
+                              style={{
+                                background: studentCount > 0 ? "rgba(41, 165, 109, 0.12)" : "rgba(86, 101, 146, 0.1)",
+                                color: studentCount > 0 ? "var(--green)" : "var(--muted)",
+                                padding: "0.2rem 0.5rem",
+                                borderRadius: "999px",
+                                fontSize: "0.8rem",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {studentCount} student{studentCount === 1 ? "" : "s"}
+                            </span>
+                          </td>
+                          <td>
+                            {subjects.length > 0 ? (
+                              <button
+                                type="button"
+                                className="secondary"
+                                style={{ fontSize: "0.74rem", padding: "0.2rem 0.5rem", borderRadius: "8px" }}
+                                onClick={() => setExpandedCourseSubjectsId(isExpanded ? null : c.id)}
+                              >
+                                {isExpanded ? "Hide" : `📚 ${subjects.length} Subjects`}
+                              </button>
+                            ) : (
+                              <span style={{ color: "var(--muted)", fontSize: "0.75rem" }}>—</span>
+                            )}
+                          </td>
+                        </tr>
+                        {isExpanded && subjects.length > 0 && (
+                          <tr>
+                            <td colSpan={4} style={{ background: "rgba(47, 74, 199, 0.03)", padding: "0.8rem 1rem" }}>
+                              <small style={{ fontWeight: 700, color: "var(--indigo)", display: "block", marginBottom: "0.3rem" }}>
+                                Official Subjects for {c.name}:
+                              </small>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                                {subjects.map((s) => (
+                                  <span
+                                    key={s}
+                                    style={{
+                                      background: "#fff",
+                                      border: "1px solid var(--rule)",
+                                      padding: "0.2rem 0.5rem",
+                                      borderRadius: "6px",
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    📖 {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })}
                   {pgClasses.length === 0 && (
                     <tr>
-                      <td colSpan={3} style={{ textAlign: "center", color: "var(--muted)" }}>
+                      <td colSpan={4} style={{ textAlign: "center", color: "var(--muted)" }}>
                         No PG degree courses created yet.
                       </td>
                     </tr>
