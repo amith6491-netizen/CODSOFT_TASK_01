@@ -181,9 +181,9 @@ th {
   border-radius: 999px;
   font-weight: 700;
 }
-.status.present, .status.paid { color: var(--green); background: rgba(41,165,109,0.12); }
-.status.absent, .status.overdue { color: var(--red); background: rgba(218,90,102,0.12); }
-.status.late, .status.pending { color: var(--amber); background: rgba(255,179,71,0.16); }
+.status.present, .status.paid, .status.badge-success { color: var(--green); background: rgba(41,165,109,0.14); }
+.status.absent, .status.overdue, .status.badge-danger { color: var(--red); background: rgba(218,90,102,0.14); }
+.status.late, .status.pending, .status.badge-warning { color: #d97706; background: rgba(255,179,71,0.22); }
 .status.excused, .status.waived { color: var(--muted); background: rgba(93,108,144,0.12); }
 
 .login-wrap {

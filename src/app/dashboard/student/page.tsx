@@ -89,24 +89,39 @@ const token = cookieStore.get("edumanage_token")?.value;
         <table>
           <thead>
             <tr>
-              <th>Exam</th>
+              <th>Date</th>
               <th>Subject</th>
+              <th>Assessment</th>
               <th>Marks</th>
+              <th>Percentage</th>
+              <th>Remarks</th>
             </tr>
           </thead>
           <tbody>
-            {student.grades.map((g) => (
-              <tr key={g.id}>
-                <td>{g.exam.title}</td>
-                <td>{g.exam.subject}</td>
-                <td>
-                  {g.marksObtained} / {g.exam.maxMarks}
-                </td>
-              </tr>
-            ))}
+            {student.grades.map((g) => {
+              const pct = Math.round((g.marksObtained / g.exam.maxMarks) * 100);
+              const badgeClass =
+                pct >= 75 ? "badge-success" : pct >= 50 ? "badge-warning" : "badge-danger";
+              return (
+                <tr key={g.id}>
+                  <td>{new Date(g.exam.date).toLocaleDateString()}</td>
+                  <td><strong>{g.exam.subject}</strong></td>
+                  <td>{g.exam.title}</td>
+                  <td>
+                    <strong>{g.marksObtained}</strong> / {g.exam.maxMarks}
+                  </td>
+                  <td>
+                    <span className={`status ${badgeClass}`}>{pct}%</span>
+                  </td>
+                  <td style={{ color: "var(--muted)", fontStyle: g.remarks ? "normal" : "italic" }}>
+                    {g.remarks || "—"}
+                  </td>
+                </tr>
+              );
+            })}
             {student.grades.length === 0 && (
               <tr>
-                <td colSpan={3} style={{ color: "var(--muted)" }}>
+                <td colSpan={6} style={{ color: "var(--muted)" }}>
                   No exam results yet.
                 </td>
               </tr>

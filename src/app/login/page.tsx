@@ -11,7 +11,7 @@ const roleHome: Record<string, string> = {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -51,8 +51,16 @@ export default function LoginPage() {
         </div>
 
         <div className="field">
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <label htmlFor="identifier">Email or Admission No.</label>
+          <input
+            id="identifier"
+            type="text"
+            placeholder="student@edumanage.com or S-2026-001"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            required
+            autoComplete="username"
+          />
         </div>
 
         <div className="field">
@@ -66,10 +74,10 @@ export default function LoginPage() {
 
         {error && <p className="error-text">{error}</p>}
 
-        <p className="hint">
+        {/*<p className="hint">
           Demo accounts (after seeding): admin@edumanage.com / teacher@edumanage.com /
           student@edumanage.com — password123
-        </p>
+        </p>*/}
       </form>
     </div>
   );

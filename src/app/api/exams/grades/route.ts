@@ -3,21 +3,58 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser, hasRole } from "@/lib/auth";
 import { z } from "zod";
 
-const gradeSchema = z.object({
+const singleGradeSchema = z.object({
   examId: z.string(),
   studentId: z.string(),
   marksObtained: z.number().nonnegative(),
   remarks: z.string().optional(),
 });
 
-// POST /api/exams/grades - teacher records a grade
+const batchGradeSchema = z.object({
+  examId: z.string(),
+  grades: z
+    .array(
+      z.object({
+        studentId: z.string(),
+        marksObtained: z.number().nonnegative(),
+        remarks: z.string().optional(),
+      })
+    )
+    .min(1),
+});
+
+// POST /api/exams/grades - teacher records a grade or batch grades
 export async function POST(req: NextRequest) {
   const user = getAuthUser(req);
   if (!hasRole(user, "TEACHER")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const parsed = gradeSchema.safeParse(await req.json());
+  const raw = await req.json();
+
+  // Check if batch submission
+  if (raw && Array.isArray(raw.grades)) {
+    const parsedBatch = batchGradeSchema.safeParse(raw);
+    if (!parsedBatch.success) {
+      return NextResponse.json({ error: parsedBatch.error.flatten() }, { status: 400 });
+    }
+
+    const { examId, grades } = parsedBatch.data;
+    const upserted = await Promise.all(
+      grades.map((g) =>
+        prisma.grade.upsert({
+          where: { examId_studentId: { examId, studentId: g.studentId } },
+          update: { marksObtained: g.marksObtained, remarks: g.remarks || null },
+          create: { examId, studentId: g.studentId, marksObtained: g.marksObtained, remarks: g.remarks || null },
+        })
+      )
+    );
+
+    return NextResponse.json({ count: upserted.length, grades: upserted });
+  }
+
+  // Single grade submission
+  const parsed = singleGradeSchema.safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
